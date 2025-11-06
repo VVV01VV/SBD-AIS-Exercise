@@ -1,1 +1,41 @@
-# todo
+# docker-compose.yml
+version: "3.9"
+
+services:
+  db:
+    image: postgres:18
+    container_name: db
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+    ports:
+      - "5435:5432"
+    volumes:
+      - pg18data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docker -d order"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orderservice
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_TCP_PORT: "5432"
+      DB_HOST: db           # service name of the Postgres container
+    ports:
+      - "3000:3000"
+    # Dockerfile already sets ENTRYPOINT to /app/ordersystem; no command needed.
+
+volumes:
+  pg18data:
