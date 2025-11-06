@@ -1,6 +1,6 @@
-#!/bin/sh
-# Exit if any command fails
-set -e
-cd /app
-go mod download
-CGO_ENABLED=0 GOOS=linux go build -o /app/ordersystem
+#!/usr/bin/env bash
+set -euo pipefail
+
+# build the single main package at repo root
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o /app/ordersystem .
+

@@ -36,6 +36,7 @@ func NewDatabaseHandler() (*DatabaseHandler, error) {
 	if err != nil {
 		return nil, err
 	}
+	slog.Info("Connected to database successfully")
 	return &DatabaseHandler{dbConn: dbConn}, nil
 }
 
@@ -62,6 +63,7 @@ func getDsn() (string, error) {
 	}
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
 		dbHost, dbUser, dbPw, dbName, dbPort)
+	slog.Info("Database DSN constructed", slog.String("dsn", dsn))
 	return dsn, nil
 }
 
@@ -79,10 +81,38 @@ func prepopulate(dbConn *gorm.DB) error {
 		// don't prepopulate if has already run
 		return nil
 	}
+
 	// create drink menu
-	// todo create drinks
-	// todo create orders
+	// create drinks
+	drinks := []model.Drink{
+		{Name: "Beer", Price: 2.5, Description: "A refreshing beer"},
+		{Name: "Spritzer", Price: 1.4, Description: "Wine mixed with soda water"},
+		{Name: "Coffe", Price: 0.5, Description: "Classic black coffee"},
+	}
+
+	//
+	if err := dbConn.Create(&drinks).Error; err != nil {
+		return err
+	}
+
+	// create orders
 	// GORM documentation can be found here: https://gorm.io/docs/index.html
+
+	// lookup from name -> ID for orders
+	idByName := make(map[string]uint, len(drinks))
+	for i := range drinks {
+		idByName[drinks[i].Name] = drinks[i].ID
+	}
+
+	orders := []model.Order{
+		{Amount: 2, DrinkID: idByName["Beer"]},
+		{Amount: 1, DrinkID: idByName["Spritzer"]},
+		{Amount: 3, DrinkID: idByName["Coffe"]},
+	}
+
+	if err := dbConn.Create(&orders).Error; err != nil {
+		return err
+	}
 
 	return nil
 }
