@@ -11,16 +11,32 @@ services:
   traefik:
     image: "traefik:v3.5.2"
     # todo add traefik config
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     # todo only expose network web
     networks:
       - web
-
+    ports:
+      - "80:80"
+      # opțional: dashboard Traefik pe 8080
+      # - "8080:8080"
 
   orderservice:
     container_name: orderservice
     build: .
     command: [ "/app/ordersystem" ]
     # todo add traefik labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.orders.rule=Host(`orders.localhost`)"
+      - "traefik.http.routers.orders.entrypoints=web"
+      - "traefik.http.services.orders.loadbalancer.server.port=3000"
     environment:
       - POSTGRES_DB=order
       - POSTGRES_USER=docker
@@ -30,12 +46,26 @@ services:
     networks:
       - intercom
       - web
+    depends_on:
+      - order-postgres
+    restart: always
 
   sws:
     image: joseluisq/static-web-server:latest
     # todo add frontend folder as volume
+    volumes:
+      - ./frontend:/public:ro
     # todo setup environment variables to expose port 80 and serve the frontend folder
+    environment:
+      - SERVER_PORT=80
+      - SERVER_ROOT=/public
     # todo add traefik labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.sws.rule=Host(`localhost`)"
+      - "traefik.http.routers.sws.entrypoints=web"
+      - "traefik.http.services.sws.loadbalancer.server.port=80"
     networks:
       - web
 
