@@ -9,8 +9,13 @@ const (
 	orderFilename = "order_%d.md"
 
 	// todo create markdown emplate, fields should be able to be populated with fmt.Sprintf
-	markdownTemplate = `
+	markdownTemplate = `# Order: %d
 
+| Created At      | Drink ID | Amount |
+|-----------------|----------|--------|
+| %s | %d | %d |
+
+Thanks for drinking with us!
 `
 )
 
@@ -24,7 +29,13 @@ type Order struct {
 }
 
 func (o *Order) ToMarkdown() string {
-	return fmt.Sprintf(markdownTemplate, o.ID, o.CreatedAt.Format(time.Stamp), o.DrinkID, o.Amount)
+	return fmt.Sprintf(
+		markdownTemplate,
+		o.ID,
+		o.CreatedAt.Format(time.Stamp), // e.g. "Nov 12 17:12:39"
+		o.DrinkID,
+		o.Amount,
+	)
 }
 
 func (o *Order) GetFilename() string {

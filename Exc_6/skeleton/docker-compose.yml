@@ -7,6 +7,7 @@ networks:
 volumes:
   order_pg_vol:
   # todo
+  order_s3_vol:   # volume for Minio data (S3 objects)
 
 services:
   traefik:
@@ -22,7 +23,6 @@ services:
       - "80:80"
       - "8080:8080"
     volumes:
-      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - web
@@ -81,8 +81,20 @@ services:
 
   order-minio:
     # todo use minio/minio:latest as image
+    image: minio/minio:latest
     # expose 8500
+    ports:
+      - "8500:8500"
     # add to network intercom
+    networks:
+      - intercom
     # use the following commands: "server", "--address", ":8500", "/data"
+    command: ["server", "--address", ":8500", "/data"]
     # map the data volume
+    volumes:
+      - order_s3_vol:/data
     # set environment variables MINIO_ROOT_USER and MINIO_ROOT_PASSWORD
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=verysecret
+    restart: unless-stopped

@@ -17,13 +17,13 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro # gives traefik read-only access to docker
     # todo only expose network web
     networks:
       - web
     ports:
       - "80:80"
-      # opțional: dashboard Traefik pe 8080
+      # opțional: dashboard Traefik on 8080
       # - "8080:8080"
 
   orderservice:

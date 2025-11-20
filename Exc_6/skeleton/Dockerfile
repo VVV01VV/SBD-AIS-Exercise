@@ -1,7 +1,10 @@
 FROM golang:1.25 AS builder
 WORKDIR /app
 COPY . .
-RUN sh /app/scripts/build-application.sh
+# Normalize Windows line endings and run the build script
+RUN sed -i 's/\r$//' scripts/build-application.sh \
+    && chmod +x scripts/build-application.sh \
+    && ./scripts/build-application.sh
 
 FROM alpine AS run
 WORKDIR /
