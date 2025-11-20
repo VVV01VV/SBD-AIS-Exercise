@@ -1,4 +1,5 @@
 #!/bin/sh
+# Exit if any command fails
 set -e
 cd /app
 go mod download
