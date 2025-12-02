@@ -8,18 +8,59 @@ option go_package = "exc8/pb";
 package models;
 
 // Messages
-
 // todo implement messages
-//
-// message MyMessage {
-//  ....
-// }
 
+// A drink that can be ordered
+message Drink {
+  int32 id = 1;
+  string name = 2;
+  int32 price = 3;        
+  string description = 4;
+}
 
-// Generate go files with:
-// Execute `generate_pb.sh`
+// Response for GetDrinks
+message GetDrinksResponse {
+  repeated Drink drinks = 1;
+}
 
+// One line item in an order
+message OrderItem {
+  int32 drink_id = 1;
+  int32 quantity = 2;
+}
+
+// Request for OrderDrink – we send several items at once
+message OrderDrinkRequest {
+  repeated OrderItem items = 1;
+}
+
+// Response for OrderDrink – just say if it worked
+message OrderDrinkResponse {
+  google.protobuf.BoolValue success = 1;
+}
+
+// Total ordered quantity per drink
+message OrderTotal {
+  Drink drink = 1;
+  int32 quantity = 2;
+}
+
+// Response for GetOrders
+message GetOrdersResponse {
+  repeated OrderTotal totals = 1;
+}
+
+// Service
 // Define the service
+// todo define rpc functions
+
 service OrderService {
-  // todo define rpc functions
+  // List all available drinks
+  rpc GetDrinks(google.protobuf.Empty) returns (GetDrinksResponse);
+
+  // Add items to the current order
+  rpc OrderDrink(OrderDrinkRequest) returns (OrderDrinkResponse);
+
+  // Return total ordered quantity per drink
+  rpc GetOrders(google.protobuf.Empty) returns (GetOrdersResponse);
 }
